@@ -30,10 +30,22 @@ Tools are the bridge between the LLM and the API.
 *   **Explicit Schemas:** Every tool input is defined as a Pydantic model. This forces the LLM to adhere to a strict schema.
 *   **Ambiguity Handling:** The System Prompt explicitly instructs the model to ask clarifying questions if a user's request is vague ("Tell me about the launch"), rather than guessing.
 
-### 4. 🔮 Future Improvements
+## 🧪 Testing
+
+The project includes an integration test suite in the `tests/` directory. This script verifies:
+1.  **Context Retention:** Ensures the agent remembers previous turns.
+2.  **Tool Usage:** Verifies Wikipedia fallback and API calls.
+3.  **Memory Management:** Simulates long conversations to test the sliding window logic.
+
+To run the tests:
+```bash
+python tests/integration_test.py
+```
+
+## 🔮 Future Improvements
 
 If this were going to production, I would add:
-1.  **Vector Database (RAG):** Instead of relying on a live Wikipedia search, I would index the SpaceX documentation and use RAG for more technical questions.
+1.  **Vector Database (RAG):** Instead of relying on a live Wikipedia search, I might index the SpaceX documentation and use RAG for more technical questions. Then of course we'd need to poll for new data and re-index it to keep the system up to date. There are many ways we can address this issue.
 2.  **Redis Caching:** Cache API responses (e.g., "latest launch" changes rarely) to respect rate limits and improve speed.
 3.  **Structured Output:** Use `response_format={"type": "json_object"}` for the final answer to allow a frontend to render rich UI elements (like a Launch Card).
 4.  **Telemetry:** Add OpenTelemetry tracing to visualize the full chain of thought and tool execution latency.
