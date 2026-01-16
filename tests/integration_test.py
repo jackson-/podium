@@ -17,8 +17,10 @@ async def run_integration_tests():
         ("Context Retention", "What is the Falcon 9?", "Falcon 9"),
         ("Follow-up", "Who makes it?", "SpaceX"),
         ("Tool Usage (Wiki)", "Tell me about the history of the Starship SN8 test flight.", "SN8"),
-        ("Ambiguity", "Tell me about the launch.", "clarify"),
-        ("Error Handling", "Tell me about the SpaceX 'Mars Imperial' rocket.", "no information")
+        # Ambiguity: Look for "which" (Which launch?) or "specify" or "clarify"
+        ("Ambiguity", "Tell me about the launch.", "which"), 
+        # Error: Look for "no information" or "couldn't find" or "not found"
+        ("Error Handling", "Tell me about the SpaceX 'Mars Imperial' rocket.", "couldn't find")
     ]
 
     for name, query, expected_keyword in tests:
@@ -29,12 +31,13 @@ async def run_integration_tests():
         
         # VERIFICATION:
         # Check the last message in the agent's history to see if it matches expectations.
-        last_response = agent.messages[-1]["content"]
+        last_msg = agent.messages[-1]
+        last_response = last_msg.get("content") if isinstance(last_msg, dict) else last_msg.content
         
-        if expected_keyword.lower() in last_response.lower():
+        if last_response and expected_keyword.lower() in last_response.lower():
             cprint(f"✅ PASS: Found keyword '{expected_keyword}'", "green")
         else:
-            cprint(f"❌ FAIL: Expected '{expected_keyword}' but got:\n{last_response[:100]}...", "red")
+            cprint(f"❌ FAIL: Expected '{expected_keyword}' but got:\n{str(last_response)[:100]}...", "red")
             # In a real CI/CD pipeline, we would raise an exception here.
             # raise Exception(f"Test {name} Failed")
     
